@@ -11,7 +11,7 @@ function main() {
         alert("ドキュメントが開かれていません。");
         return;
     }
-
+    
     var doc = app.activeDocument;
     var targetLayer = doc.activeLayer;
 
