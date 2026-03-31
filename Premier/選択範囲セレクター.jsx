@@ -1,7 +1,7 @@
 /*
- * 選択範囲セレクター（中心点基準 ＋ アクティブトラック自動認識版）
- * 選択中のクリップの「中心時間」が重なるクリップを、
- * ターゲット（V1, A1など）がオンになっているトラックからのみ探し出して一括選択します。
+ * 選択範囲セレクター（両端5%マージン・ダイナミック面判定版）
+ * 基準クリップの長さを計算し、両端から「5%」だけ内側に狭めた範囲と
+ * 重なっているクリップをアクティブトラックから選択します。
  */
 (function() {
     var seq = app.project.activeSequence;
@@ -17,9 +17,9 @@
     }
 
     // ==========================================
-    // 1. 基準クリップの「中心時間」と「情報」を記録
+    // 1. 基準クリップの「5%内側の範囲」を計算して記録
     // ==========================================
-    var centerTimes = [];
+    var targetZones = [];
     var originalClipsInfo = [];
 
     for (var i = 0; i < selectedClips.length; i++) {
@@ -28,7 +28,17 @@
             var startSec = clip.start.seconds;
             var endSec = clip.end.seconds;
             
-            centerTimes.push((startSec + endSec) / 2);
+            // クリップの全体の長さを計算
+            var duration = endSec - startSec;
+            
+            // ★全体の長さの「5%」を計算
+            var margin = duration * 0.05;
+            
+            targetZones.push({
+                zStart: startSec + margin, // 開始位置から5%内側へ
+                zEnd: endSec - margin      // 終了位置から5%内側へ
+            });
+            
             originalClipsInfo.push({
                 start: startSec,
                 end: endSec,
@@ -43,22 +53,14 @@
     }
 
     // ==========================================
-    // 2. トラックをスキャンして選択する処理
+    // 2. トラックをスキャンして選択
     // ==========================================
     function processTracks(tracks) {
         for (var t = 0; t < tracks.numTracks; t++) {
             var track = tracks[t];
 
-            // ★ ここがユーザー様に教えていただいた究極の判定処理！
-            // トラックのターゲット（V1, A1の青いハイライト）が「オフ」の場合はスキップ
-            if (!(track.isTargeted && track.isTargeted())) {
-                continue;
-            }
-
-            // ロックされている場合も念のためスキップ
-            if (track.isLocked()) {
-                continue;
-            }
+            if (!(track.isTargeted && track.isTargeted())) continue;
+            if (track.isLocked()) continue;
 
             var clips = track.clips;
             for (var c = 0; c < clips.numItems; c++) {
@@ -67,16 +69,15 @@
                 var tEnd = targetClip.end.seconds;
                 var isMatch = false;
 
-                // 基準クリップの中心時間が収まっているか
-                for (var r = 0; r < centerTimes.length; r++) {
-                    var center = centerTimes[r];
-                    if (tStart <= center && tEnd >= center) {
+                // ターゲットクリップが、両端5%を削った安全エリアに少しでも触れているか
+                for (var r = 0; r < targetZones.length; r++) {
+                    if (tStart < targetZones[r].zEnd && tEnd > targetZones[r].zStart) {
                         isMatch = true;
                         break;
                     }
                 }
 
-                // 「基準にした元のクリップ自身」が再選択されるのを防ぐ処理
+                // 元のクリップ除外
                 var isOriginal = false;
                 for (var o = 0; o < originalClipsInfo.length; o++) {
                     var orig = originalClipsInfo[o];
@@ -93,7 +94,6 @@
         }
     }
 
-    // ビデオとオーディオの両方をスキャン
     processTracks(seq.videoTracks);
     processTracks(seq.audioTracks);
 
