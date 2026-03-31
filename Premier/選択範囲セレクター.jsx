@@ -1,7 +1,7 @@
 /*
- * 選択範囲セレクター（中心点基準・全自動版） for JSXLauncher
- * 選択中のクリップの「中心時間」が重なるクリップを、ロックされていない全トラックから一括選択します。
- * ダイアログ入力の手間を省き、1クリックで即実行されます。
+ * 選択範囲セレクター（中心点基準 ＋ アクティブトラック自動認識版）
+ * 選択中のクリップの「中心時間」が重なるクリップを、
+ * ターゲット（V1, A1など）がオンになっているトラックからのみ探し出して一括選択します。
  */
 (function() {
     var seq = app.project.activeSequence;
@@ -28,10 +28,7 @@
             var startSec = clip.start.seconds;
             var endSec = clip.end.seconds;
             
-            // 中心時間を計算して保存
             centerTimes.push((startSec + endSec) / 2);
-
-            // 後で「元のクリップ」を再選択しないように情報を保存しておく
             originalClipsInfo.push({
                 start: startSec,
                 end: endSec,
@@ -52,7 +49,13 @@
         for (var t = 0; t < tracks.numTracks; t++) {
             var track = tracks[t];
 
-            // ★トラックがロック（鍵マーク）されている場合は無視する
+            // ★ ここがユーザー様に教えていただいた究極の判定処理！
+            // トラックのターゲット（V1, A1の青いハイライト）が「オフ」の場合はスキップ
+            if (!(track.isTargeted && track.isTargeted())) {
+                continue;
+            }
+
+            // ロックされている場合も念のためスキップ
             if (track.isLocked()) {
                 continue;
             }
@@ -64,7 +67,7 @@
                 var tEnd = targetClip.end.seconds;
                 var isMatch = false;
 
-                // 基準クリップの「中心時間」が、ターゲットクリップの(開始〜終了)の範囲内に収まっているか
+                // 基準クリップの中心時間が収まっているか
                 for (var r = 0; r < centerTimes.length; r++) {
                     var center = centerTimes[r];
                     if (tStart <= center && tEnd >= center) {
@@ -77,14 +80,12 @@
                 var isOriginal = false;
                 for (var o = 0; o < originalClipsInfo.length; o++) {
                     var orig = originalClipsInfo[o];
-                    // 時間とクリップ名が完全に一致したら除外する
                     if (Math.abs(tStart - orig.start) < 0.001 && Math.abs(tEnd - orig.end) < 0.001 && targetClip.name === orig.name) {
                         isOriginal = true;
                         break;
                     }
                 }
 
-                // 条件に合致し、かつ元のクリップでなければ選択
                 if (isMatch && !isOriginal) {
                     targetClip.setSelected(true, true);
                 }
@@ -92,7 +93,7 @@
         }
     }
 
-    // ビデオとオーディオの両方をスキャンして実行
+    // ビデオとオーディオの両方をスキャン
     processTracks(seq.videoTracks);
     processTracks(seq.audioTracks);
 
