@@ -15,51 +15,39 @@
             return;
         }
 
-        // 2. ビデオトラックのリストを作成
+        // 2. ターゲット（アクティブ）なビデオトラックを特定
         var videoTracks = seq.videoTracks;
-        var numTracks = videoTracks.numTracks;
-        
-        if (numTracks === 0) {
-            alert("ビデオトラックが存在しません。");
+        var targetTrack = null;
+
+        // 上のトラックから順にチェックし、最初にターゲット指定されているものを採用
+        for (var i = videoTracks.numTracks - 1; i >= 0; i--) {
+            if (videoTracks[i].isTargeted()) {
+                targetTrack = videoTracks[i];
+                break;
+            }
+        }
+
+        // ターゲットされているトラックがない場合は、一番下のトラック（V1）をデフォルトにするか警告
+        if (!targetTrack) {
+            alert("ターゲット指定（V1, V2などのボタンがオン）されているビデオトラックが見つかりません。");
             return;
         }
 
-        // 3. トラック選択ダイアログ
-        var trackNamesStr = "テキストを書き出すビデオトラックの番号（1〜" + numTracks + "）を半角数字で入力してください:\n\n";
-        for (var i = 0; i < numTracks; i++) {
-            var trackName = videoTracks[i].name ? videoTracks[i].name : "ビデオトラック " + (i + 1);
-            trackNamesStr += (i + 1) + ": " + trackName + "\n";
-        }
+        // 3. トラック名を取得してファイル名を決定
+        var trackName = targetTrack.name ? targetTrack.name : "Video Track";
+        // ファイル名に使えない文字を置換（念のため）
+        var safeTrackName = trackName.replace(/[\\\/:*?"<>|]/g, "_");
 
-        var userInput = prompt(trackNamesStr, "1");
-        
-        // キャンセルされた場合
-        if (userInput === null) {
-            return; 
-        }
-
-        var selectedTrackIndex = parseInt(userInput, 10) - 1;
-        
-        // 入力値のチェック
-        if (isNaN(selectedTrackIndex) || selectedTrackIndex < 0 || selectedTrackIndex >= numTracks) {
-            alert("無効な番号が入力されました。処理を中止します。");
-            return;
-        }
-
-        // 4. 保存先ダイアログ
-        var saveFile = File.saveDialog("CSVファイルの保存先を選択", "*.csv");
+        // 4. 保存先ダイアログ（デフォルトファイル名をトラック名に設定）
+        var saveFile = File.saveDialog("CSVファイルの保存先を選択", safeTrackName + ".csv");
         if (!saveFile) {
             return; // キャンセルされた場合は終了
         }
 
-        // 5. データ抽出処理（クリップ名のみ）
-        var targetTrack = videoTracks[selectedTrackIndex];
+        // 5. データ抽出処理
         var clips = targetTrack.clips;
-        
-        // ヘッダー行（もし「クリップ名」という見出しも不要な場合は、この1行を var csvData = []; に変更してください）
         var csvData = [];
 
-        // クリップをループして名前だけを取得
         for (var i = 0; i < clips.numItems; i++) {
             var clipName = clips[i].name;
             csvData.push([clipName]);
@@ -69,7 +57,6 @@
         function escapeCSV(str) {
             if (str === null || str === undefined) return '""';
             str = str.toString();
-            // カンマや改行が含まれる場合はダブルクォーテーションで囲む
             if (str.search(/("|,|\n|\r)/g) >= 0) {
                 str = '"' + str.replace(/"/g, '""') + '"';
             }
@@ -92,7 +79,7 @@
         saveFile.write(csvString);
         saveFile.close();
 
-        alert("CSVの書き出しが完了しました。\n保存先: " + saveFile.fsName);
+        alert("トラック「" + trackName + "」の書き出しが完了しました。\n保存先: " + saveFile.fsName);
 
     } catch (e) {
         alert("エラーが発生しました: " + e.message);
