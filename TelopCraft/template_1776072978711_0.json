@@ -1,0 +1,872 @@
+{
+  "version": "1.0.0",
+  "id": "template_1776072978711_0",
+  "name": "SAMPLE2",
+  "created": "2026-04-04T07:00:19.786Z",
+  "structure": {
+    "type": "layerGroup",
+    "name": "グループ 4",
+    "groupStyle": {
+      "layerEffects": {},
+      "blendOptions": {
+        "opacity": 100,
+        "blendMode": "passThrough"
+      }
+    },
+    "layers": [
+      {
+        "id": "layer_23",
+        "type": "group",
+        "name": "グループ 1",
+        "order": 0,
+        "visible": true,
+        "clippingMask": false,
+        "groupStyle": {
+          "layerEffects": {
+            "_innerShadowMultiRaw": [
+              {
+                "_obj": "innerShadow",
+                "enabled": true,
+                "present": true,
+                "showInDialog": true,
+                "mode": {
+                  "_enum": "blendMode",
+                  "_value": "linearLight"
+                },
+                "color": {
+                  "_obj": "RGBColor",
+                  "red": 255,
+                  "grain": 255,
+                  "blue": 255
+                },
+                "opacity": {
+                  "_unit": "percentUnit",
+                  "_value": 100
+                },
+                "useGlobalAngle": false,
+                "localLightingAngle": {
+                  "_unit": "angleUnit",
+                  "_value": 126
+                },
+                "distance": {
+                  "_unit": "pixelsUnit",
+                  "_value": 5
+                },
+                "chokeMatte": {
+                  "_unit": "pixelsUnit",
+                  "_value": 0
+                },
+                "blur": {
+                  "_unit": "pixelsUnit",
+                  "_value": 0
+                },
+                "noise": {
+                  "_unit": "percentUnit",
+                  "_value": 0
+                },
+                "antiAlias": false,
+                "transferSpec": {
+                  "_obj": "shapeCurveType",
+                  "name": "線形"
+                }
+              }
+            ],
+            "_frameFXMultiRaw": [
+              {
+                "_obj": "frameFX",
+                "enabled": true,
+                "present": true,
+                "showInDialog": true,
+                "style": {
+                  "_enum": "frameStyle",
+                  "_value": "outsetFrame"
+                },
+                "paintType": {
+                  "_enum": "frameFill",
+                  "_value": "solidColor"
+                },
+                "mode": {
+                  "_enum": "blendMode",
+                  "_value": "normal"
+                },
+                "opacity": {
+                  "_unit": "percentUnit",
+                  "_value": 100
+                },
+                "size": {
+                  "_unit": "pixelsUnit",
+                  "_value": 2
+                },
+                "color": {
+                  "_obj": "RGBColor",
+                  "red": 0.0038910505827516317,
+                  "grain": 37.47470632195473,
+                  "blue": 199.0000033378601
+                },
+                "overprint": false
+              }
+            ]
+          },
+          "blendOptions": {
+            "opacity": 100,
+            "blendMode": "passThrough"
+          }
+        },
+        "layers": [
+          {
+            "id": "layer_25",
+            "type": "group",
+            "name": "グループ 2",
+            "order": 0,
+            "visible": true,
+            "clippingMask": false,
+            "groupStyle": {
+              "layerEffects": {
+                "_dropShadowMultiRaw": [
+                  {
+                    "_obj": "dropShadow",
+                    "enabled": true,
+                    "present": true,
+                    "showInDialog": true,
+                    "mode": {
+                      "_enum": "blendMode",
+                      "_value": "normal"
+                    },
+                    "color": {
+                      "_obj": "RGBColor",
+                      "red": 51.91050410270691,
+                      "grain": 152.91440427303314,
+                      "blue": 217.0000022649765
+                    },
+                    "opacity": {
+                      "_unit": "percentUnit",
+                      "_value": 100
+                    },
+                    "useGlobalAngle": true,
+                    "localLightingAngle": {
+                      "_unit": "angleUnit",
+                      "_value": 90
+                    },
+                    "distance": {
+                      "_unit": "pixelsUnit",
+                      "_value": 12
+                    },
+                    "chokeMatte": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "blur": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "noise": {
+                      "_unit": "percentUnit",
+                      "_value": 0
+                    },
+                    "antiAlias": false,
+                    "transferSpec": {
+                      "_obj": "shapeCurveType",
+                      "name": "Lineal",
+                      "curve": [
+                        {
+                          "_obj": "curvePoint",
+                          "horizontal": 0,
+                          "vertical": 0
+                        },
+                        {
+                          "_obj": "curvePoint",
+                          "horizontal": 255,
+                          "vertical": 255
+                        }
+                      ]
+                    },
+                    "layerConceals": false
+                  }
+                ]
+              },
+              "blendOptions": {
+                "opacity": 100,
+                "blendMode": "passThrough"
+              }
+            },
+            "layers": [
+              {
+                "id": "layer_3",
+                "type": "text",
+                "name": "SAMPLE",
+                "order": 0,
+                "isTarget": true,
+                "visible": true,
+                "clippingMask": false,
+                "rotation": 0,
+                "geometry": {
+                  "bounds": {
+                    "left": 450,
+                    "top": 386,
+                    "right": 1083,
+                    "bottom": 512
+                  },
+                  "anchor": "center"
+                },
+                "_textStyleRaw": {
+                  "_obj": "textStyle",
+                  "styleSheetHasParent": true,
+                  "fontScript": 1,
+                  "fontTechnology": 2,
+                  "fontAvailable": true,
+                  "size": {
+                    "_unit": "pixelsUnit",
+                    "_value": 37.53937530517578
+                  },
+                  "impliedFontSize": {
+                    "_unit": "pixelsUnit",
+                    "_value": 148.97303431133585
+                  },
+                  "horizontalScale": 100,
+                  "verticalScale": 100,
+                  "syntheticBold": false,
+                  "syntheticItalic": false,
+                  "autoLeading": true,
+                  "tracking": -2,
+                  "baselineShift": {
+                    "_unit": "pixelsUnit",
+                    "_value": 16.87942123413086
+                  },
+                  "impliedBaselineShift": {
+                    "_unit": "pixelsUnit",
+                    "_value": 66.98509440355464
+                  },
+                  "autoKern": {
+                    "_enum": "autoKern",
+                    "_value": "opticalKern"
+                  },
+                  "fontCaps": {
+                    "_enum": "fontCaps",
+                    "_value": "normal"
+                  },
+                  "digitSet": {
+                    "_enum": "digitSet",
+                    "_value": "defaultDigits"
+                  },
+                  "kashidas": {
+                    "_enum": "kashidas",
+                    "_value": "kashidaDefault"
+                  },
+                  "diacXOffset": {
+                    "_unit": "pixelsUnit",
+                    "_value": 0
+                  },
+                  "diacYOffset": {
+                    "_unit": "pixelsUnit",
+                    "_value": 0
+                  },
+                  "markYDistFromBaseline": {
+                    "_unit": "pixelsUnit",
+                    "_value": 48
+                  },
+                  "baseline": {
+                    "_enum": "baseline",
+                    "_value": "normal"
+                  },
+                  "otbaseline": {
+                    "_enum": "otbaseline",
+                    "_value": "normal"
+                  },
+                  "strikethrough": {
+                    "_enum": "strikethrough",
+                    "_value": "strikethroughOff"
+                  },
+                  "underline": {
+                    "_enum": "underline",
+                    "_value": "underlineOff"
+                  },
+                  "ligature": true,
+                  "altligature": false,
+                  "contextualLigatures": true,
+                  "fractions": false,
+                  "ordinals": false,
+                  "swash": false,
+                  "titling": false,
+                  "connectionForms": true,
+                  "stylisticAlternates": false,
+                  "stylisticSets": 0,
+                  "ornaments": false,
+                  "justificationAlternates": false,
+                  "figureStyle": {
+                    "_enum": "figureStyle",
+                    "_value": "normal"
+                  },
+                  "proportionalMetrics": false,
+                  "kana": false,
+                  "italics": false,
+                  "baselineDirection": {
+                    "_enum": "baselineDirection",
+                    "_value": "rotated"
+                  },
+                  "textLanguage": {
+                    "_enum": "textLanguage",
+                    "_value": "englishLanguage"
+                  },
+                  "japaneseAlternate": {
+                    "_enum": "japaneseAlternate",
+                    "_value": "defaultForm"
+                  },
+                  "mojiZume": 0,
+                  "gridAlignment": {
+                    "_enum": "gridAlignment",
+                    "_value": "roman"
+                  },
+                  "noBreak": false,
+                  "color": {
+                    "_obj": "RGBColor",
+                    "red": 255,
+                    "grain": 255,
+                    "blue": 255
+                  },
+                  "strokeColor": {
+                    "_obj": "RGBColor",
+                    "red": 255,
+                    "grain": 255,
+                    "blue": 255
+                  },
+                  "baseParentStyle": {
+                    "_obj": "textStyle",
+                    "fontScript": 1,
+                    "fontTechnology": 2,
+                    "fontAvailable": true,
+                    "size": {
+                      "_unit": "pixelsUnit",
+                      "_value": 12
+                    },
+                    "impliedFontSize": {
+                      "_unit": "pixelsUnit",
+                      "_value": 47.621368155520486
+                    },
+                    "horizontalScale": 100,
+                    "verticalScale": 100,
+                    "syntheticBold": false,
+                    "syntheticItalic": false,
+                    "autoLeading": true,
+                    "tracking": 0,
+                    "baselineShift": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "impliedBaselineShift": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "characterRotation": 0,
+                    "autoKern": {
+                      "_enum": "autoKern",
+                      "_value": "metricsKern"
+                    },
+                    "fontCaps": {
+                      "_enum": "fontCaps",
+                      "_value": "normal"
+                    },
+                    "digitSet": {
+                      "_enum": "digitSet",
+                      "_value": "defaultDigits"
+                    },
+                    "dirOverride": {
+                      "_enum": "dirOverride",
+                      "_value": "dirOverrideDefault"
+                    },
+                    "kashidas": {
+                      "_enum": "kashidas",
+                      "_value": "kashidaDefault"
+                    },
+                    "diacVPos": {
+                      "_enum": "diacVPos",
+                      "_value": "diacVPosOpenType"
+                    },
+                    "diacXOffset": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "diacYOffset": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "markYDistFromBaseline": {
+                      "_unit": "pixelsUnit",
+                      "_value": 100
+                    },
+                    "baseline": {
+                      "_enum": "baseline",
+                      "_value": "normal"
+                    },
+                    "otbaseline": {
+                      "_enum": "otbaseline",
+                      "_value": "normal"
+                    },
+                    "strikethrough": {
+                      "_enum": "strikethrough",
+                      "_value": "strikethroughOff"
+                    },
+                    "underline": {
+                      "_enum": "underline",
+                      "_value": "underlineOff"
+                    },
+                    "underlineOffset": {
+                      "_unit": "pixelsUnit",
+                      "_value": 0
+                    },
+                    "ligature": true,
+                    "altligature": false,
+                    "contextualLigatures": false,
+                    "alternateLigatures": false,
+                    "oldStyle": false,
+                    "fractions": false,
+                    "ordinals": false,
+                    "swash": false,
+                    "titling": false,
+                    "connectionForms": false,
+                    "stylisticAlternates": false,
+                    "stylisticSets": 0,
+                    "ornaments": false,
+                    "justificationAlternates": false,
+                    "figureStyle": {
+                      "_enum": "figureStyle",
+                      "_value": "normal"
+                    },
+                    "proportionalMetrics": false,
+                    "kana": false,
+                    "italics": false,
+                    "ruby": false,
+                    "baselineDirection": {
+                      "_enum": "baselineDirection",
+                      "_value": "rotated"
+                    },
+                    "textLanguage": {
+                      "_enum": "textLanguage",
+                      "_value": "englishLanguage"
+                    },
+                    "japaneseAlternate": {
+                      "_enum": "japaneseAlternate",
+                      "_value": "defaultForm"
+                    },
+                    "mojiZume": 0,
+                    "gridAlignment": {
+                      "_enum": "gridAlignment",
+                      "_value": "roman"
+                    },
+                    "enableWariChu": false,
+                    "wariChuCount": 2,
+                    "wariChuLineGap": 0,
+                    "wariChuScale": 0.5,
+                    "wariChuWidow": 2,
+                    "wariChuOrphan": 2,
+                    "wariChuJustification": {
+                      "_enum": "wariChuJustification",
+                      "_value": "wariChuAutoJustify"
+                    },
+                    "tcyUpDown": 0,
+                    "tcyLeftRight": 0,
+                    "leftAki": -1,
+                    "rightAki": -1,
+                    "jiDori": 0,
+                    "noBreak": false,
+                    "color": {
+                      "_obj": "RGBColor",
+                      "red": 0,
+                      "grain": 0,
+                      "blue": 0
+                    },
+                    "strokeColor": {
+                      "_obj": "RGBColor",
+                      "red": 0,
+                      "grain": 0,
+                      "blue": 0
+                    },
+                    "fill": true,
+                    "stroke": false,
+                    "fillFirst": true,
+                    "fillOverPrint": false,
+                    "strokeOverPrint": false,
+                    "lineCap": {
+                      "_enum": "lineCap",
+                      "_value": "buttCap"
+                    },
+                    "lineJoin": {
+                      "_enum": "lineJoin",
+                      "_value": "miterJoin"
+                    },
+                    "lineWidth": {
+                      "_unit": "pixelsUnit",
+                      "_value": 1
+                    },
+                    "miterLimit": {
+                      "_unit": "pixelsUnit",
+                      "_value": 4
+                    },
+                    "lineDashoffset": 0
+                  }
+                },
+                "_paragraphStyleRaw": {
+                  "_obj": "paragraphStyle",
+                  "styleSheetHasParent": true,
+                  "align": {
+                    "_enum": "alignmentType",
+                    "_value": "left"
+                  },
+                  "autoLeadingPercentage": 1.2000000476837158,
+                  "leadingType": {
+                    "_enum": "leadingType",
+                    "_value": "leadingBelow"
+                  },
+                  "directionType": {
+                    "_enum": "directionType",
+                    "_value": "dirLeftToRight"
+                  },
+                  "hyphenate": true,
+                  "hyphenateWordSize": 6,
+                  "hyphenatePreLength": 2,
+                  "hyphenatePostLength": 2,
+                  "hyphenateLimit": 8,
+                  "hyphenationZone": 36,
+                  "hyphenateCapitalized": false,
+                  "justificationWordMinimum": 0.800000011920929,
+                  "justificationWordDesired": 1,
+                  "justificationWordMaximum": 1.3300000429153442,
+                  "justificationLetterMinimum": 0,
+                  "justificationLetterDesired": 0,
+                  "justificationLetterMaximum": 0,
+                  "justificationGlyphMinimum": 1,
+                  "justificationGlyphDesired": 1,
+                  "justificationGlyphMaximum": 1,
+                  "burasagari": {
+                    "_enum": "burasagari",
+                    "_value": "burasagariStandard"
+                  },
+                  "textEveryLineComposer": true,
+                  "textComposerEngine": {
+                    "_enum": "textComposerEngine",
+                    "_value": "textOptycaComposer"
+                  },
+                  "listStyle": {
+                    "_obj": "listStyleDetails",
+                    "listStylePredefinedTag": {
+                      "_enum": "listStylePredefinedTag",
+                      "_value": "listStylePredefinedTagNone"
+                    },
+                    "bulletListStyleTag": {
+                      "_enum": "bulletListStyleTag",
+                      "_value": "listStylePredefinedTagNone"
+                    }
+                  },
+                  "listTier": 0
+                },
+                "layerEffects": {
+                  "_solidFillMultiRaw": [
+                    {
+                      "_obj": "solidFill",
+                      "enabled": true,
+                      "present": true,
+                      "showInDialog": true,
+                      "mode": {
+                        "_enum": "blendMode",
+                        "_value": "normal"
+                      },
+                      "color": {
+                        "_obj": "RGBColor",
+                        "red": 131.00000739097595,
+                        "grain": 224.36964601278305,
+                        "blue": 255
+                      },
+                      "opacity": {
+                        "_unit": "percentUnit",
+                        "_value": 100
+                      }
+                    }
+                  ],
+                  "_frameFXMultiRaw": [
+                    {
+                      "_obj": "frameFX",
+                      "enabled": true,
+                      "present": true,
+                      "showInDialog": true,
+                      "style": {
+                        "_enum": "frameStyle",
+                        "_value": "outsetFrame"
+                      },
+                      "paintType": {
+                        "_enum": "frameFill",
+                        "_value": "solidColor"
+                      },
+                      "mode": {
+                        "_enum": "blendMode",
+                        "_value": "normal"
+                      },
+                      "opacity": {
+                        "_unit": "percentUnit",
+                        "_value": 100
+                      },
+                      "size": {
+                        "_unit": "pixelsUnit",
+                        "_value": 1
+                      },
+                      "color": {
+                        "_obj": "RGBColor",
+                        "red": 19.295719899237156,
+                        "grain": 87.4124550819397,
+                        "blue": 164.00000542402267
+                      },
+                      "overprint": false
+                    }
+                  ]
+                },
+                "blendOptions": {
+                  "opacity": 100,
+                  "blendMode": "normal"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "layer_28",
+        "type": "group",
+        "name": "グループ 3",
+        "order": 1,
+        "visible": true,
+        "clippingMask": false,
+        "groupStyle": {
+          "layerEffects": {
+            "_solidFillMultiRaw": [
+              {
+                "_obj": "solidFill",
+                "enabled": true,
+                "present": true,
+                "showInDialog": true,
+                "mode": {
+                  "_enum": "blendMode",
+                  "_value": "color"
+                },
+                "color": {
+                  "_obj": "RGBColor",
+                  "red": 255,
+                  "grain": 252.10505694150925,
+                  "blue": 173.00000488758087
+                },
+                "opacity": {
+                  "_unit": "percentUnit",
+                  "_value": 100
+                }
+              }
+            ]
+          },
+          "blendOptions": {
+            "opacity": 100,
+            "blendMode": "passThrough"
+          }
+        },
+        "layers": [
+          {
+            "id": "layer_27",
+            "type": "shape",
+            "name": "長方形 1",
+            "order": 0,
+            "visible": true,
+            "clippingMask": false,
+            "rotation": 0,
+            "geometry": {
+              "bounds": {
+                "left": 396.61590390326626,
+                "top": 361.2044528812982,
+                "right": 1149.3840960967334,
+                "bottom": 543.7955471187018
+              },
+              "relativeToText": {
+                "offsetX": -53.38409609673374,
+                "offsetY": -24.79554711870179,
+                "width": 752.7681921934671,
+                "height": 182.59109423740364
+              }
+            },
+            "shape": {
+              "type": "rectangle",
+              "cornerRadius": 5
+            },
+            "fill": {
+              "type": "solid",
+              "color": {
+                "r": 255,
+                "g": 255,
+                "b": 255
+              },
+              "opacity": 100
+            },
+            "stroke": {
+              "enabled": true,
+              "color": {
+                "r": 19.295719899237156,
+                "g": 87.4124550819397,
+                "b": 164.00000542402267
+              },
+              "width": 2,
+              "alignment": "strokeStyleAlignCenter",
+              "opacity": 100
+            },
+            "layerEffects": {
+              "_bevelEmbossRaw": {
+                "_obj": "bevelEmboss",
+                "enabled": true,
+                "present": true,
+                "showInDialog": true,
+                "highlightMode": {
+                  "_enum": "blendMode",
+                  "_value": "linearDodge"
+                },
+                "highlightColor": {
+                  "_obj": "RGBColor",
+                  "red": 255,
+                  "grain": 255,
+                  "blue": 255
+                },
+                "highlightOpacity": {
+                  "_unit": "percentUnit",
+                  "_value": 100
+                },
+                "shadowMode": {
+                  "_enum": "blendMode",
+                  "_value": "normal"
+                },
+                "shadowColor": {
+                  "_obj": "RGBColor",
+                  "red": 0,
+                  "grain": 0,
+                  "blue": 0
+                },
+                "shadowOpacity": {
+                  "_unit": "percentUnit",
+                  "_value": 18
+                },
+                "bevelTechnique": {
+                  "_enum": "bevelTechnique",
+                  "_value": "softMatte"
+                },
+                "bevelStyle": {
+                  "_enum": "bevelEmbossStyle",
+                  "_value": "innerBevel"
+                },
+                "useGlobalAngle": false,
+                "localLightingAngle": {
+                  "_unit": "angleUnit",
+                  "_value": 121
+                },
+                "localLightingAltitude": {
+                  "_unit": "angleUnit",
+                  "_value": 37
+                },
+                "strengthRatio": {
+                  "_unit": "percentUnit",
+                  "_value": 1000
+                },
+                "blur": {
+                  "_unit": "pixelsUnit",
+                  "_value": 10
+                },
+                "bevelDirection": {
+                  "_enum": "bevelEmbossStampStyle",
+                  "_value": "in"
+                },
+                "transferSpec": {
+                  "_obj": "shapeCurveType",
+                  "name": "線形"
+                },
+                "antialiasGloss": false,
+                "softness": {
+                  "_unit": "pixelsUnit",
+                  "_value": 0
+                },
+                "useShape": false,
+                "useTexture": false
+              },
+              "_satinRaw": {
+                "_obj": "chromeFX",
+                "enabled": true,
+                "present": true,
+                "showInDialog": true,
+                "mode": {
+                  "_enum": "blendMode",
+                  "_value": "multiply"
+                },
+                "color": {
+                  "_obj": "RGBColor",
+                  "red": 0,
+                  "grain": 0,
+                  "blue": 0
+                },
+                "antiAlias": true,
+                "invert": true,
+                "opacity": {
+                  "_unit": "percentUnit",
+                  "_value": 16
+                },
+                "localLightingAngle": {
+                  "_unit": "angleUnit",
+                  "_value": 90
+                },
+                "distance": {
+                  "_unit": "pixelsUnit",
+                  "_value": 57
+                },
+                "blur": {
+                  "_unit": "pixelsUnit",
+                  "_value": 18
+                },
+                "mappingShape": {
+                  "_obj": "shapeCurveType",
+                  "name": "線形"
+                }
+              },
+              "_frameFXMultiRaw": [
+                {
+                  "_obj": "frameFX",
+                  "enabled": true,
+                  "present": true,
+                  "showInDialog": true,
+                  "style": {
+                    "_enum": "frameStyle",
+                    "_value": "insetFrame"
+                  },
+                  "paintType": {
+                    "_enum": "frameFill",
+                    "_value": "solidColor"
+                  },
+                  "mode": {
+                    "_enum": "blendMode",
+                    "_value": "normal"
+                  },
+                  "opacity": {
+                    "_unit": "percentUnit",
+                    "_value": 100
+                  },
+                  "size": {
+                    "_unit": "pixelsUnit",
+                    "_value": 15
+                  },
+                  "color": {
+                    "_obj": "RGBColor",
+                    "red": 19.295719899237156,
+                    "grain": 87.4124550819397,
+                    "blue": 164.00000542402267
+                  },
+                  "overprint": false
+                }
+              ]
+            },
+            "blendOptions": {
+              "opacity": 100,
+              "blendMode": "normal"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "thumbnail": "template_1776072978711_0.png"
+}

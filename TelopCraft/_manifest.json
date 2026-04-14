@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tree": [
+    {
+      "type": "folder",
+      "id": "folder_1776072978807_fkick",
+      "name": "SAMPLE",
+      "collapsed": false,
+      "children": [
+        {
+          "type": "template",
+          "id": "template_1776072978748_1"
+        },
+        {
+          "type": "template",
+          "id": "template_1776072978711_0"
+        }
+      ]
+    }
+  ],
+  "initialized": true
+}
