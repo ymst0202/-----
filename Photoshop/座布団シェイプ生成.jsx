@@ -1,49 +1,47 @@
 /*
-  テキストレイヤー用 座布団（シェイプ）生成スクリプト
-  ※フォルダ選択対応＆複数レイヤー同時適用版
+  テキストレイヤー用 座布団（シェイプ）生成スクリプト（単体・グループ両対応版）
 */
 
 #target photoshop
 app.bringToFront();
 
+// 処理を1つのヒストリー（取り消し）にまとめるための変数
+var ZABUTON_SETTINGS = {};
+
 function main() {
-    // 1. ドキュメントの確認
     if (app.documents.length === 0) {
         alert("ドキュメントが開かれていません。");
         return;
     }
     
     var doc = app.activeDocument;
+    var activeLyr = doc.activeLayer;
+    var textLayersToProcess = [];
 
-    // 2. 選択されている全レイヤー（またはフォルダ）を取得
-    var selectedLayers = getSelectedLayersDOM();
-    var textLayers = [];
-
-    // 3. 選択されたレイヤー群の中からテキストレイヤーを抽出（フォルダの中身も自動チェック）
-    for (var i = 0; i < selectedLayers.length; i++) {
-        extractTextLayers(selectedLayers[i], textLayers);
-    }
-
-    // 重複排除（フォルダとその中のレイヤーを両方選択していた場合などの保険）
-    var uniqueTextLayers = [];
-    for (var i = 0; i < textLayers.length; i++) {
-        var isDuplicate = false;
-        for (var j = 0; j < uniqueTextLayers.length; j++) {
-            if (textLayers[i] === uniqueTextLayers[j]) {
-                isDuplicate = true;
-                break;
+    // 1. 選択されているレイヤーの種類を判定し、処理対象をリストアップする
+    if (activeLyr.typename === "LayerSet") {
+        // ▼ パターンA：グループ（フォルダ）が選択されている場合 ▼
+        for (var i = 0; i < activeLyr.layers.length; i++) {
+            var childLayer = activeLyr.layers[i];
+            if (childLayer.kind === LayerKind.TEXT) {
+                textLayersToProcess.push(childLayer);
             }
         }
-        if (!isDuplicate) uniqueTextLayers.push(textLayers[i]);
-    }
-    textLayers = uniqueTextLayers;
-
-    if (textLayers.length === 0) {
-        alert("選択範囲（またはフォルダ内）にテキストレイヤーが含まれていません。\nテキストレイヤーか、テキストが入ったフォルダを選択して実行してください。");
+    } else if (activeLyr.kind === LayerKind.TEXT) {
+        // ▼ パターンB：テキストレイヤー単体が選択されている場合 ▼
+        textLayersToProcess.push(activeLyr);
+    } else {
+        // どちらでもない（通常の画像レイヤー等が選ばれている）場合
+        alert("テキストレイヤー、またはテキストを含むグループ（フォルダ）を選択してから実行してください。");
         return;
     }
 
-    // 4. ダイアログの作成（余白設定用）
+    if (textLayersToProcess.length === 0) {
+        alert("処理対象となるテキストレイヤーが見つかりませんでした。");
+        return;
+    }
+
+    // 2. ダイアログの作成
     var win = new Window("dialog", "座布団の余白設定");
     win.alignChildren = "fill";
 
@@ -73,139 +71,68 @@ function main() {
     var pnlOptions = win.add("panel", undefined, "オプション");
     pnlOptions.alignChildren = "left";
     var chkEffects = pnlOptions.add("checkbox", undefined, "レイヤースタイルの大きさを含める");
-    chkEffects.value = true; 
+    chkEffects.value = true;
 
     var btnGrp = win.add("group");
     btnGrp.alignment = "center";
     btnGrp.add("button", undefined, "OK", {name: "ok"});
     btnGrp.add("button", undefined, "キャンセル", {name: "cancel"});
 
-    // 5. ダイアログの表示と処理
+    // 3. 実行処理
     if (win.show() === 1) {
-        var pTop = parseFloat(inpTop.text) || 0;
-        var pBottom = parseFloat(inpBottom.text) || 0;
-        var pLeft = parseFloat(inpLeft.text) || 0;
-        var pRight = parseFloat(inpRight.text) || 0;
+        // 設定値を保存
+        ZABUTON_SETTINGS.pTop = parseFloat(inpTop.text) || 0;
+        ZABUTON_SETTINGS.pBottom = parseFloat(inpBottom.text) || 0;
+        ZABUTON_SETTINGS.pLeft = parseFloat(inpLeft.text) || 0;
+        ZABUTON_SETTINGS.pRight = parseFloat(inpRight.text) || 0;
+        ZABUTON_SETTINGS.chkEffects = chkEffects.value;
+        ZABUTON_SETTINGS.targets = textLayersToProcess; // 判定で集めたテキストレイヤーの配列
 
         var originalRulerUnits = app.preferences.rulerUnits;
         app.preferences.rulerUnits = Units.PIXELS;
 
-        // 6. 取得した全テキストレイヤーに対して順番に処理を実行
-        for (var j = 0; j < textLayers.length; j++) {
-            var targetLayer = textLayers[j];
+        // 単体でもグループでも、まとめて1つのヒストリー（取り消し）にする
+        app.activeDocument.suspendHistory("座布団の生成", "processAllTargetLayers()");
 
-            try {
-                // 対象のテキストレイヤーをアクティブにする
-                doc.activeLayer = targetLayer;
-                
-                var bounds;
-                if (chkEffects.value) {
-                    bounds = targetLayer.bounds;
-                } else {
-                    bounds = targetLayer.boundsNoEffects; 
-                }
-
-                // 位置座標を計算
-                var left = bounds[0].value - pLeft;
-                var top = bounds[1].value - pTop;
-                var right = bounds[2].value + pRight;
-                var bottom = bounds[3].value + pBottom;
-
-                // シェイプの描画
-                createShapeLayer(top, left, bottom, right);
-
-                // 生成したシェイプの移動とリネーム
-                var shapeLayer = doc.activeLayer;
-                shapeLayer.name = "座布団_" + targetLayer.name;
-                shapeLayer.move(targetLayer, ElementPlacement.PLACEAFTER);
-
-            } catch(e) {
-                continue;
-            }
-        }
-
-        // 単位設定を元に戻す
         app.preferences.rulerUnits = originalRulerUnits;
-        
-        // 処理完了後、元のレイヤー群を選択状態に戻す
-        restoreSelection(selectedLayers);
     }
 }
 
-// --- ユーティリティ関数群 ---
-
-// フォルダ内のテキストレイヤーを再帰的に抽出する関数
-function extractTextLayers(layer, arr) {
-    if (layer.typename === "ArtLayer") {
-        if (layer.kind === LayerKind.TEXT) {
-            arr.push(layer);
-        }
-    } else if (layer.typename === "LayerSet") {
-        // フォルダ（グループ）の場合は中身をループ
-        for (var i = 0; i < layer.layers.length; i++) {
-            extractTextLayers(layer.layers[i], arr);
-        }
-    }
-}
-
-// 選択中の全レイヤーをDOMオブジェクトとして取得
-function getSelectedLayersDOM() {
-    var domLayers = [];
+// 収集したテキストレイヤーをループ処理する関数
+function processAllTargetLayers() {
     var doc = app.activeDocument;
-    var ids = [];
-    
-    try {
-        var ref = new ActionReference();
-        ref.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-        var desc = executeActionGet(ref);
+    var targets = ZABUTON_SETTINGS.targets;
 
-        if (desc.hasKey(stringIDToTypeID('targetLayers'))) {
-            var descList = desc.getList(stringIDToTypeID('targetLayers'));
-            for (var i = 0; i < descList.count; i++) {
-                try {
-                    var idx = descList.getReference(i).getIndex();
-                    var ref2 = new ActionReference();
-                    ref2.putIndex(charIDToTypeID("Lyr "), idx);
-                    var layerDesc = executeActionGet(ref2);
-                    ids.push(layerDesc.getInteger(stringIDToTypeID("layerID")));
-                } catch(e) {}
-            }
-        } else {
-            var ref2 = new ActionReference();
-            ref2.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-            ids.push(executeActionGet(ref2).getInteger(stringIDToTypeID("layerID")));
-        }
-    } catch (e) {}
+    for (var i = 0; i < targets.length; i++) {
+        var targetLayer = targets[i];
+        
+        // 処理対象のレイヤーをアクティブにする
+        doc.activeLayer = targetLayer;
 
-    for (var k = 0; k < ids.length; k++) {
+        var bounds;
         try {
-            var desc = new ActionDescriptor();
-            var ref = new ActionReference();
-            ref.putIdentifier(charIDToTypeID("Lyr "), ids[k]);
-            desc.putReference(charIDToTypeID("null"), ref);
-            desc.putBoolean(charIDToTypeID("makeVisible"), false);
-            executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
-            domLayers.push(doc.activeLayer);
-        } catch(e) {}
-    }
-    return domLayers;
-}
-
-// 処理後に元の選択状態を復元する関数
-function restoreSelection(layersArray) {
-    if (layersArray.length === 0) return;
-    try {
-        app.activeDocument.activeLayer = layersArray[0];
-        for (var i = 1; i < layersArray.length; i++) {
-            var desc = new ActionDescriptor();
-            var ref = new ActionReference();
-            ref.putName(charIDToTypeID("Lyr "), layersArray[i].name);
-            desc.putReference(charIDToTypeID("null"), ref);
-            desc.putEnumerated(stringIDToTypeID("selectionModifier"), stringIDToTypeID("selectionModifierType"), stringIDToTypeID("addToSelection"));
-            desc.putBoolean(charIDToTypeID("makeVisible"), false);
-            executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+            if (ZABUTON_SETTINGS.chkEffects) {
+                bounds = targetLayer.bounds;
+            } else {
+                bounds = targetLayer.boundsNoEffects; 
+            }
+        } catch(e) {
+            bounds = targetLayer.bounds; 
         }
-    } catch(e) {}
+
+        var left = bounds[0].value - ZABUTON_SETTINGS.pLeft;
+        var top = bounds[1].value - ZABUTON_SETTINGS.pTop;
+        var right = bounds[2].value + ZABUTON_SETTINGS.pRight;
+        var bottom = bounds[3].value + ZABUTON_SETTINGS.pBottom;
+
+        // シェイプの描画
+        createShapeLayer(top, left, bottom, right);
+
+        // 生成したシェイプをテキストの下に移動
+        var shapeLayer = doc.activeLayer;
+        shapeLayer.name = "座布団_" + targetLayer.name;
+        shapeLayer.move(targetLayer, ElementPlacement.PLACEAFTER);
+    }
 }
 
 // 四角形のシェイプレイヤーを作成する関数
@@ -237,6 +164,8 @@ function createShapeLayer(top, left, bottom, right) {
     var desc2 = new ActionDescriptor();
     var desc3 = new ActionDescriptor();
     var desc4 = new ActionDescriptor();
+    
+    // 色指定（RGB 200,200,200）
     desc4.putDouble( charIDToTypeID( "Rd  " ), 200.0 ); 
     desc4.putDouble( charIDToTypeID( "Grn " ), 200.0 );
     desc4.putDouble( charIDToTypeID( "Bl  " ), 200.0 );
