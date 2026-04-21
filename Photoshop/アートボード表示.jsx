@@ -1,5 +1,6 @@
 /*
-  アートボード番号検索＆全画面ズームスクリプト（極限スリム・スパッと版）
+  アートボード番号検索＆全画面ズームスクリプト（真・最速版）
+  ※DOM操作の速さを活かしつつ、第一階層のみを検索することでフリーズを完全に排除しました。
 */
 
 #target photoshop
@@ -35,11 +36,14 @@ function main() {
         var targetNum = inpNumber.text.replace(/\s+/g, ""); 
         if (targetNum === "") return;
 
-        var targetId = findTargetLayerIDAM(targetNum);
+        // 超高速なDOM検索（第一階層のみ）
+        var targetLayer = findTargetLayerFast(doc, targetNum);
 
-        if (targetId !== null) {
+        if (targetLayer !== null) {
             win.close(); 
-            selectAndFit(targetId);
+            // レイヤーを選択してズーム処理
+            doc.activeLayer = targetLayer;
+            fitArtboardToScreenAM();
         } else {
             alert("番号「" + targetNum + "」が見つかりませんでした。");
             inpNumber.active = true;
@@ -51,50 +55,33 @@ function main() {
 }
 
 // --------------------------------------------------------
-// ActionManagerを使った爆速検索
+// 超高速なDOM検索（アートボードの中身は探さないのでフリーズしない）
 // --------------------------------------------------------
-function findTargetLayerIDAM(targetNum) {
+function findTargetLayerFast(doc, targetNum) {
     var suffix = "_" + targetNum; 
     var prefix = targetNum + "_"; 
+    
+    // doc.layers は第一階層（ルート）にあるレイヤー・アートボードのみのリスト
+    var topLayers = doc.layers;
 
-    var refDoc = new ActionReference();
-    refDoc.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-    var docDesc = executeActionGet(refDoc);
-    var numLayers = docDesc.getInteger(stringIDToTypeID("numberOfLayers"));
+    for (var i = 0; i < topLayers.length; i++) {
+        var lyr = topLayers[i];
+        var name = lyr.name;
 
-    for (var i = numLayers; i > 0; i--) {
-        try {
-            var ref = new ActionReference();
-            ref.putIndex(charIDToTypeID("Lyr "), i);
-            var desc = executeActionGet(ref);
-            
-            var name = desc.getString(charIDToTypeID("Nm  "));
-            
-            if (name === targetNum || 
-                name.slice(-suffix.length) === suffix ||
-                name.substring(0, prefix.length) === prefix) {
-                return desc.getInteger(stringIDToTypeID("layerID"));
-            }
-        } catch (e) {
-            continue;
+        // 名前が一致するかチェック
+        if (name === targetNum || 
+            name.slice(-suffix.length) === suffix ||
+            name.substring(0, prefix.length) === prefix) {
+            return lyr;
         }
     }
-    return null; 
+    return null; // 見つからなかった場合も、中身を探さないので一瞬でここに来る
 }
 
 // --------------------------------------------------------
-// レイヤー選択とズームを一度に行う（UI更新の無駄を削減）
+// 選択中のアートボード単体を画面いっぱいに表示する（スパッと版）
 // --------------------------------------------------------
-function selectAndFit(id) {
-    // 1. レイヤーを裏側で選択
-    var descSelect = new ActionDescriptor();
-    var refSelect = new ActionReference();
-    refSelect.putIdentifier(charIDToTypeID("Lyr "), id);
-    descSelect.putReference(charIDToTypeID("null"), refSelect);
-    descSelect.putBoolean(charIDToTypeID("MkVs"), false);
-    executeAction(charIDToTypeID("slct"), descSelect, DialogModes.NO);
-
-    // 2. ズームコマンドを1発だけ叩く
+function fitArtboardToScreenAM() {
     try {
         var descFit = new ActionDescriptor();
         var refFit = new ActionReference();
@@ -102,7 +89,7 @@ function selectAndFit(id) {
         descFit.putReference(charIDToTypeID("null"), refFit);
         executeAction(charIDToTypeID("slct"), descFit, DialogModes.NO);
     } catch (e) {
-        // 万が一古いPhotoshop等でコマンド名が違う場合の保険
+        // 万が一のための保険コマンド
         try {
             var descFit2 = new ActionDescriptor();
             var refFit2 = new ActionReference();

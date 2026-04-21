@@ -1,6 +1,6 @@
 /*
   CSV読み込み ＋ 特定文字（スラッシュ囲み）座布団生成スクリプト（完全版）
-  （強調・座布団スタイル選択 ＋ プレビュー選択 ＋ 1行自動下段 ＋ 生成間隔調整 ＋ 左揃え事後スライド方式）
+  （強調・座布団スタイル選択 ＋ プレビュー選択 ＋ 1行自動下段 ＋ 生成間隔調整）
 */
 
 #target photoshop
@@ -72,12 +72,6 @@ function main() {
         pnlLayout.orientation = "column";
         pnlLayout.alignChildren = "left";
 
-        // ★追加：テロップの揃え位置
-        var grpAlign = pnlLayout.add("group");
-        grpAlign.add("statictext", undefined, "テロップの揃え位置:");
-        var dropAlign = grpAlign.add("dropdownlist", undefined, ["中央揃え", "左揃え"]);
-        dropAlign.selection = 0; 
-
         var grpGap = pnlLayout.add("group");
         grpGap.add("statictext", undefined, "文字と文字の間隔 (px):");
         var inpGap = grpGap.add("edittext", undefined, "0"); inpGap.characters = 4;
@@ -85,6 +79,7 @@ function main() {
         var chkEffects = pnlLayout.add("checkbox", undefined, "レイヤースタイルの大きさを含める（シャドウ切れ防止）");
         chkEffects.value = true;
 
+        // ★新規追加：CSV展開時の間隔設定
         var pnlCsvLayout = win.add("panel", undefined, "CSV展開時の配置（テロップ同士が連なる隙間）");
         pnlCsvLayout.orientation = "column";
         pnlCsvLayout.alignChildren = "left";
@@ -136,6 +131,7 @@ function main() {
             var selectedTextStyle = dropTextStyle.selection ? dropTextStyle.selection.text : "";
             if (selectedTextStyle === "(スタイルを使用しない)") selectedTextStyle = "";
 
+            // CSVの行数が未入力や0の場合はエラーを防ぐため10をセット
             var parsedMaxRows = parseInt(inpMaxRows.text, 10);
             if (isNaN(parsedMaxRows) || parsedMaxRows <= 0) parsedMaxRows = 10;
 
@@ -143,13 +139,12 @@ function main() {
                 paddingPercent: parseFloat(inpPaddingPercent.text) || 0,
                 gap: parseFloat(inpGap.text) || 0,
                 useEffects: chkEffects.value,
-                marginX: parseFloat(inpMarginX.text) || 0,     
-                marginY: parseFloat(inpMarginY.text) || 0,     
-                maxRows: parsedMaxRows,                        
+                marginX: parseFloat(inpMarginX.text) || 0,     // 追加分
+                marginY: parseFloat(inpMarginY.text) || 0,     // 追加分
+                maxRows: parsedMaxRows,                        // 追加分
                 zabutonStyleName: selectedZabutonStyle, 
                 textStyleName: selectedTextStyle,
                 transparentBase: chkTransparent.value, 
-                alignMode: dropAlign.selection ? dropAlign.selection.index : 0, // ★追加
                 color: [
                     parseFloat(inpR.text) || 0,
                     parseFloat(inpG.text) || 0,
@@ -168,35 +163,19 @@ function main() {
 
                 var settings = getSettings();
                 var layersToDelete = [];
-                
-                var t1_ref = textLayers.length >= 1 ? textLayers[0] : null;
-                var t2_ref = textLayers.length >= 2 ? textLayers[1] : null;
-                var g1 = null, g2 = null;
 
-                if (radPreview1.value && t1_ref) {
-                    var previewText1 = t1_ref.textItem.contents;
+                if (radPreview1.value && textLayers.length >= 1) {
+                    var t1 = textLayers[0];
+                    var previewText1 = t1.textItem.contents;
                     if (previewText1.indexOf("/") === -1) previewText1 = "1行目/プレビュー/確認用";
-                    var origCenterX1 = getCenterX(t1_ref.bounds);
-                    g1 = buildTextGroup(currentTemplateGroup, t1_ref, previewText1, origCenterX1, settings, "1行目", layersToDelete);
-                } else if (radPreview2.value && t2_ref) {
-                    var previewText2 = t2_ref.textItem.contents;
+                    var origCenterX1 = getCenterX(t1.bounds);
+                    buildTextGroup(currentTemplateGroup, t1, previewText1, origCenterX1, settings, "1行目", layersToDelete);
+                } else if (radPreview2.value && textLayers.length >= 2) {
+                    var t2 = textLayers[1];
+                    var previewText2 = t2.textItem.contents;
                     if (previewText2.indexOf("/") === -1) previewText2 = "2行目/プレビュー/確認用";
-                    var origCenterX2 = getCenterX(t2_ref.bounds);
-                    g2 = buildTextGroup(currentTemplateGroup, t2_ref, previewText2, origCenterX2, settings, "2行目", layersToDelete);
-                }
-
-                // ★追加：ご提案の事後スライドによる左揃え処理
-                if (settings.alignMode === 1) {
-                    var b1 = g1 ? g1.bounds : (t1_ref ? t1_ref.bounds : null);
-                    var b2 = g2 ? g2.bounds : (t2_ref ? t2_ref.bounds : null);
-                    if (b1 && b2) {
-                        var left1 = b1[0].value;
-                        var left2 = b2[0].value;
-                        var minLeft = Math.min(left1, left2); // 長い方の左端（より左にある方）を取得
-                        // 短い方を長い方の左端に合わせてスライドさせる
-                        if (g1 && left1 > minLeft) g1.translate(minLeft - left1, 0);
-                        if (g2 && left2 > minLeft) g2.translate(minLeft - left2, 0);
-                    }
+                    var origCenterX2 = getCenterX(t2.bounds);
+                    buildTextGroup(currentTemplateGroup, t2, previewText2, origCenterX2, settings, "2行目", layersToDelete);
                 }
                 
                 app.refresh(); 
@@ -206,7 +185,6 @@ function main() {
         // 入力・選択変更時のリスナー
         radPreview1.onClick = updatePreview; 
         radPreview2.onClick = updatePreview; 
-        dropAlign.onChange = updatePreview; // ★追加
         inpPaddingPercent.onChange = updatePreview;
         inpGap.onChange = updatePreview;
         chkEffects.onClick = updatePreview;
@@ -305,6 +283,7 @@ function getTextLayers(layerSet) {
 }
 
 function runCSVProcess(data, templateGroup, settings) {
+    // ダイアログからの設定値を適用
     var marginX = settings.marginX;
     var marginY = settings.marginY;
     var maxRows = settings.maxRows;
@@ -348,13 +327,12 @@ function runCSVProcess(data, templateGroup, settings) {
         var t2 = textLayers.length >= 2 ? textLayers[1] : null;
 
         var layersToDelete = []; 
-        var g1 = null, g2 = null;
 
         // 1行目の処理
         if (t1) {
             if (textValue1) {
                 var origCenterX1 = getCenterX(t1.bounds);
-                g1 = buildTextGroup(newGroup, t1, textValue1, origCenterX1, settings, "1行目", layersToDelete);
+                buildTextGroup(newGroup, t1, textValue1, origCenterX1, settings, "1行目", layersToDelete);
             } else {
                 layersToDelete.push(t1);
             }
@@ -364,22 +342,9 @@ function runCSVProcess(data, templateGroup, settings) {
         if (t2) {
             if (textValue2) {
                 var origCenterX2 = getCenterX(t2.bounds);
-                g2 = buildTextGroup(newGroup, t2, textValue2, origCenterX2, settings, "2行目", layersToDelete);
+                buildTextGroup(newGroup, t2, textValue2, origCenterX2, settings, "2行目", layersToDelete);
             } else {
                 layersToDelete.push(t2);
-            }
-        }
-
-        // ★追加：ご提案の事後スライドによる左揃え処理（本番用）
-        if (settings.alignMode === 1) {
-            var b1 = g1 ? g1.bounds : null;
-            var b2 = g2 ? g2.bounds : null;
-            if (b1 && b2) {
-                var left1 = b1[0].value;
-                var left2 = b2[0].value;
-                var minLeft = Math.min(left1, left2);
-                if (g1 && left1 > minLeft) g1.translate(minLeft - left1, 0);
-                if (g2 && left2 > minLeft) g2.translate(minLeft - left2, 0);
             }
         }
 
@@ -394,7 +359,7 @@ function runCSVProcess(data, templateGroup, settings) {
 function buildTextGroup(targetGroup, targetTextLayer, textValue, origCenterX, settings, lineName, layersToDelete) {
     if (textValue.indexOf("/") === -1) {
         targetTextLayer.textItem.contents = textValue;
-        return targetTextLayer; // ★追加（スライドできるようにそのまま返す）
+        return; 
     }
 
     var parts = textValue.split("/");
@@ -499,8 +464,6 @@ function buildTextGroup(targetGroup, targetTextLayer, textValue, origCenterX, se
         var z = textLayersToZabuton[m];
         createZabutonByMath(z.layer, z.left, z.top, z.right, z.bottom, z.paddingPx, settings);
     }
-
-    return group; // ★追加（出来上がったグループを返す）
 }
 
 function createZabutonByMath(targetLayer, textLeft, textTop, textRight, textBottom, paddingPx, settings) {
