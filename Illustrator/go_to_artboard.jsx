@@ -4,9 +4,9 @@ var input = prompt("アートボード名の番号を入力", "");
 if (input !== null && input !== "") {
     input = input.replace(/^\s+|\s+$/g, "");
     var targetIndex = -1;
-    var num = parseInt(input, 10);
+    var num = parseFloat(input);
 
-    // 末尾の数字でアートボードを検索（例: "t 47" -> 47 で一致）
+    // 末尾の数字でアートボードを検索（例: "t 47" -> 47、"t 80.1" -> 80.1 で一致）
     if (!isNaN(num) && String(num) === input) {
         for (var i = 0; i < doc.artboards.length; i++) {
             var parts = doc.artboards[i].name.split(" ");
@@ -51,9 +51,21 @@ if (input !== null && input !== "") {
         );
         newZoom = Math.max(0.02, Math.min(64, newZoom));
 
-        // ビューを移動してからパネルのアクティブを更新（最後に呼ぶことでパネル選択が確定）
+        // ズームと位置を移動
         view.zoom = newZoom;
         view.centerPoint = [centerX, centerY];
+
+        // 1. まず対象のアートボードをアクティブにする（ここで指定しないと次の選択がずれる）
         doc.artboards.setActiveArtboardIndex(targetIndex);
+
+        // 2. 移動先のアートボード上のオブジェクトを選択
+        doc.selection = null;
+        doc.selectObjectsOnActiveArtboard();
+
+        // 3. 【修正箇所】オブジェクト選択によってIllustratorが勝手に別のアートボードをアクティブにしてしまうのを防ぐため、念押しでもう一度セット！
+        doc.artboards.setActiveArtboardIndex(targetIndex);
+
+        // パネルの表示を確実に更新させる
+        app.redraw();
     }
 }

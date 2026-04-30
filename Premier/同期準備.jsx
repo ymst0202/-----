@@ -1,133 +1,183 @@
 ﻿/**
  * StackTimeline_AutoClean.jsx
- * - タイムラインで選択したクリップを階段状に再配置
- * - 足りないトラックを自動で増設
- * - 配置完了後、元のクリップ（音声含む）を自動で削除
+ * - v25確定版: addTracks(audioCount, videoCount) ← 副作用考慮済み
+ * - ビデオ増設時にオーディオも+1される副作用を利用して効率化
  */
 (function () {
   var TICKS_PER_SECOND = 254016000000;
 
-  function info(msg){ try{app.setSDKEventMessage(msg,"info");}catch(e){$.writeln(msg);} }
-  function err (msg){ try{app.setSDKEventMessage(msg,"error");}catch(e){$.writeln("[ERROR] "+msg);} }
+  function info(msg) { try { app.setSDKEventMessage(msg, "info");  } catch(e) { $.writeln(msg); } }
+  function err(msg)  { try { app.setSDKEventMessage(msg, "error"); } catch(e) { $.writeln("[ERROR] " + msg); } }
 
-  function secondsToTime(sec){
+  function secondsToTime(sec) {
     var tm = new Time();
     tm.seconds = sec;
     return tm;
   }
 
-  // トラックを自動で一括増設する関数
-  function addTracksIfNeeded(seq, neededCount) {
-    var currentCount = seq.videoTracks.numTracks;
-    if (currentCount >= neededCount) return true;
-
-    var diff = neededCount - currentCount;
-    
-    try {
-      app.enableQE();
-      var qeSeq = qe.project.getActiveSequence();
-      if (qeSeq && qeSeq.addTracks) {
-        qeSeq.addTracks(diff, 0); // ビデオトラックのみ必要な分を追加
-        return true;
-      }
-    } catch (e) {}
-
-    // フォールバック（標準API）
-    try {
-      for (var i = 0; i < diff; i++) {
-        seq.videoTracks.addTrack();
-      }
-    } catch (e) {}
-    
-    return true;
+  function ticksToTime(ticks) {
+    var tm = new Time();
+    tm.ticks = ticks;
+    return tm;
   }
+
+  /**
+   * ビデオ・オーディオトラックを必要数まで増設（v25副作用考慮版）
+   * - ビデオ: addTracks(diff, 0) で一括増設可能
+   * - オーディオ: ビデオ増設のたびに+1の副作用があるため、
+   *   ビデオ増設後に残り差分だけループで補う
+   * @param {Object} qeSeq       - QEシーケンス
+   * @param {number} neededVideo - 必要なビデオトラック総数
+   * @param {number} neededAudio - 必要なオーディオトラック総数
+   * @returns {boolean}
+   */
+  function addTracksIfNeeded(qeSeq, neededVideo, neededAudio) {
+    var seq = app.project.activeSequence;
+
+    // ── Step A: ビデオを一括増設（副作用でオーディオも増える）──
+    var diffVideo = neededVideo - seq.videoTracks.numTracks;
+    if (diffVideo > 0) {
+      qeSeq.addTracks(diffVideo, 0); // ビデオ+diffVideo、オーディオ+1（副作用）
+      seq = app.project.activeSequence;
+      info("ビデオ増設後: V=" + seq.videoTracks.numTracks + " / A=" + seq.audioTracks.numTracks);
+    }
+
+    // ── Step B: 副作用込みでオーディオの残り差分を補う ──
+    var maxRetry = 100;
+    var count    = 0;
+    while (app.project.activeSequence.audioTracks.numTracks < neededAudio) {
+      qeSeq.addTracks(0, 0); // オーディオのみ+1（ビデオ増設なし）
+      if (++count >= maxRetry) { err("オーディオトラック増設が上限に達しました。"); break; }
+    }
+
+    seq = app.project.activeSequence;
+    info("増設完了: V=" + seq.videoTracks.numTracks + " / A=" + seq.audioTracks.numTracks);
+
+    return seq.videoTracks.numTracks >= neededVideo &&
+           seq.audioTracks.numTracks >= neededAudio;
+  }
+
+  /**
+   * クリップ群を指定トラックリストへ階段状に配置
+   */
+  function placeClipsStaircase(clipDataArr, trackList, label, startIndex) {
+    if (clipDataArr.length === 0) return;
+
+    var currentStartSec = clipDataArr[0].startTicks / TICKS_PER_SECOND;
+
+    for (var k = 0; k < clipDataArr.length; k++) {
+      var trackIndex = startIndex + k;
+      var data  = clipDataArr[k];
+      var track = trackList[trackIndex];
+
+      if (!track) {
+        err(label + (trackIndex + 1) + " トラックが見つかりません。スキップします。");
+        continue;
+      }
+
+      var durationSec = data.durationTicks / TICKS_PER_SECOND;
+      if (durationSec <= 0) durationSec = 1.0;
+
+      var inserted = track.overwriteClip(data.pItem, secondsToTime(currentStartSec));
+
+      if (inserted) {
+        inserted.inPoint  = ticksToTime(data.inPointTicks);
+        inserted.outPoint = ticksToTime(data.outPointTicks);
+      } else {
+        err(label + (trackIndex + 1) + " への配置に失敗しました。");
+      }
+
+      currentStartSec += durationSec;
+    }
+  }
+
+  // ─── メイン処理 ───────────────────────────────────────────────
 
   try {
     var seq = app.project.activeSequence;
     if (!seq) throw new Error("アクティブなシーケンスがありません。");
 
     var sel = seq.getSelection();
-    if (!sel || sel.length === 0) {
-      throw new Error("タイムライン上で対象のクリップを選択してください。");
+    if (!sel || sel.length === 0) throw new Error("タイムライン上で対象のクリップを選択してください。");
+
+    var videoClipData    = [];
+    var audioClipData    = [];
+    var allOriginalClips = [];
+    var videoStartTicks  = {};
+
+    // パス1：ビデオ系を収集
+    for (var i = 0; i < sel.length; i++) {
+      var clip = sel[i];
+      if (!clip.projectItem || clip.mediaType === "Audio") continue;
+      allOriginalClips.push(clip);
+      videoClipData.push({
+        pItem:         clip.projectItem,
+        startTicks:    clip.start.ticks,
+        inPointTicks:  clip.inPoint.ticks,
+        outPointTicks: clip.outPoint.ticks,
+        durationTicks: clip.end.ticks - clip.start.ticks
+      });
+      videoStartTicks[clip.start.ticks] = true;
     }
 
-    var videoClipData = [];
-    var allOriginalClips = [];
-
-    // 1. 選択されたクリップの「情報だけ」を抜き出し、本体は削除リストに入れる
-    for (var i = 0; i < sel.length; i++) {
-      allOriginalClips.push(sel[i]);
-
-      // ビデオクリップのみを階段状の対象とする
-      if (sel[i].mediaType === "Video" && sel[i].projectItem) {
-        videoClipData.push({
-          pItem: sel[i].projectItem,
-          startTicks: sel[i].start.ticks,
-          inPointTicks: sel[i].inPoint.ticks, // トリミング状態を保存
-          outPointTicks: sel[i].outPoint.ticks,
-          durationTicks: sel[i].end.ticks - sel[i].start.ticks
+    // パス2：オーディオを収集
+    for (var ii = 0; ii < sel.length; ii++) {
+      var aclip = sel[ii];
+      if (!aclip.projectItem || aclip.mediaType !== "Audio") continue;
+      allOriginalClips.push(aclip);
+      if (!videoStartTicks[aclip.start.ticks]) {
+        audioClipData.push({
+          pItem:         aclip.projectItem,
+          startTicks:    aclip.start.ticks,
+          inPointTicks:  aclip.inPoint.ticks,
+          outPointTicks: aclip.outPoint.ticks,
+          durationTicks: aclip.end.ticks - aclip.start.ticks
         });
       }
     }
 
-    if (videoClipData.length === 0) {
-      throw new Error("選択範囲にビデオクリップが含まれていません。");
+    if (videoClipData.length === 0 && audioClipData.length === 0) {
+      throw new Error("配置可能なクリップが選択範囲に含まれていません。");
     }
 
-    // タイムライン上の元の配置順（左から右）に並び替え
-    videoClipData.sort(function(a, b){ return a.startTicks - b.startTicks; });
+    videoClipData.sort(function(a, b) { return a.startTicks - b.startTicks; });
+    audioClipData.sort(function(a, b) { return a.startTicks - b.startTicks; });
 
-    info("選択数: " + videoClipData.length + " 件。再構築を開始します…");
+    var neededVideo     = videoClipData.length;
+    var audioStartIndex = videoClipData.length;
+    var neededAudio     = audioStartIndex + audioClipData.length;
 
-    // 2. 配置が被らないよう、先に元のクリップ（音声含む）を全削除して更地にする
+    info("ビデオ系: " + neededVideo + " 件 / 単体オーディオ: " + audioClipData.length + " 件");
+    if (audioClipData.length > 0) {
+      info("WAV配置先: A" + (audioStartIndex + 1) + "〜A" + neededAudio);
+    }
+
+    // Step 1: QE API を初期化
+    app.enableQE();
+    var qeSeq = qe.project.getActiveSequence();
+    if (!qeSeq || !qeSeq.addTracks) throw new Error("QE API が使用できません。");
+
+    // Step 2: トラック増設（削除前に実施・副作用考慮）
+    var ok = addTracksIfNeeded(qeSeq, neededVideo, neededAudio);
+    if (!ok) throw new Error(
+      "トラックの増設に失敗しました。" +
+      "手動で V" + neededVideo + " / A" + neededAudio + " まで追加してから再実行してください。"
+    );
+
+    // Step 3: 元クリップを全削除
     for (var j = 0; j < allOriginalClips.length; j++) {
-      try {
-        // remove(false, false) = 他のクリップを詰めない設定で削除
-        allOriginalClips[j].remove(false, false);
-      } catch(e) {}
+      try { allOriginalClips[j].remove(false, false); } catch(e) {}
     }
 
-    // 3. トラックが足りない場合は自動増設
-    addTracksIfNeeded(seq, videoClipData.length);
-    seq = app.project.activeSequence; // トラック追加後に情報をリフレッシュ
+    // Step 4: 階段状に配置
+    seq = app.project.activeSequence;
+    placeClipsStaircase(videoClipData, seq.videoTracks, "V", 0);
+    placeClipsStaircase(audioClipData, seq.audioTracks, "A", audioStartIndex);
 
-    if (seq.videoTracks.numTracks < videoClipData.length) {
-      throw new Error("Premiereの仕様によりトラックの自動増設が追いつきませんでした。手動でV" + videoClipData.length + "まで追加してから再実行してください。");
-    }
+    info("完了：V1〜V" + neededVideo + " / A" + (audioStartIndex + 1) + "〜A" + neededAudio + " に階段状に再配置しました。");
 
-    // 4. 保存しておいた情報をもとに、階段状に新規配置
-    var currentStartTimeSec = videoClipData[0].startTicks / TICKS_PER_SECOND;
-
-    for (var k = 0; k < videoClipData.length; k++) {
-      var data = videoClipData[k];
-      var track = seq.videoTracks[k]; // V1から順番に配置
-      
-      if (!track) continue;
-
-      var insertTime = secondsToTime(currentStartTimeSec);
-      var durationSec = data.durationTicks / TICKS_PER_SECOND;
-      if (durationSec <= 0) durationSec = 1.0;
-
-      // クリップを上書き配置
-      var inserted = track.overwriteClip(data.pItem, insertTime);
-
-      if (inserted) {
-        // 元のクリップがトリミングされていた場合、その長さを復元する
-        var newIn = new Time(); newIn.ticks = data.inPointTicks;
-        var newOut = new Time(); newOut.ticks = data.outPointTicks;
-        inserted.inPoint = newIn;
-        inserted.outPoint = newOut;
-      } else {
-        err("V" + (k + 1) + " への配置に失敗しました。");
-      }
-
-      // 次のクリップの開始時間を「直前のクリップの長さ分」だけ後ろにずらす
-      currentStartTimeSec += durationSec;
-    }
-
-    info("完了：元のクリップを削除し、V1〜V" + videoClipData.length + " に階段状に再配置しました。");
-
-  } catch (e) {
+  } catch(e) {
     err("スクリプトエラー: " + e.message);
   }
+
 })();
