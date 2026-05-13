@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #222;
+  color: #ccc;
+  font-family: "Meiryo", "Yu Gothic", sans-serif;
+  font-size: 11px;
+  padding: 8px;
+  user-select: none;
+}
+
+/* ── 選択モードセクション ── */
+.mode-section {
+  background: #4b3477;
+  border-radius: 3px;
+  padding: 7px;
+  margin-bottom: 10px;
+}
+.mode-title {
+  font-size: 9px;
+  color: #c0a8ee;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+.mode-btn {
+  background: #3a2660;
+  color: #b090e0;
+  border: 1px solid #6a4aaa;
+  border-radius: 2px;
+  padding: 6px 3px;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.mode-btn:hover { background: #513580; }
+.mode-btn.on {
+  background: #7b5fc0;
+  color: #fff;
+  border-color: #a080e0;
+}
+
+/* ── セクション共通 ── */
+.section { margin-bottom: 10px; }
+.section-title {
+  font-size: 9px;
+  color: #666;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-bottom: 3px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #333;
+}
+
+/* ── 条件セクション ── */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.check-row input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: #7b5fc0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check-row label { cursor: pointer; font-size: 10px; color: #bbb; }
+.margin-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.margin-label { color: #999; font-size: 10px; white-space: nowrap; }
+.margin-input {
+  background: #2a2a2a;
+  color: #ccc;
+  border: 1px solid #505050;
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  width: 64px;
+  text-align: center;
+  font-family: inherit;
+}
+.margin-input:focus { outline: none; border-color: #7b5fc0; }
+.hint { color: #555; font-size: 9px; margin-top: 3px; margin-bottom: 6px; }
+
+/* ── ボタン共通 ── */
+.btn {
+  background: #3c3c3c;
+  color: #ccc;
+  border: 1px solid #505050;
+  border-radius: 2px;
+  padding: 6px 3px;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.btn:hover { background: #484848; border-color: #666; }
+.btn:active { background: #585858; }
+.btn.exec {
+  background: #1e3a5f;
+  color: #7ab8f5;
+  border-color: #3a6ea8;
+  font-size: 11px;
+}
+.btn.exec:hover { background: #274d7a; }
+
+/* ── オプションセクション ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- 選択モード -->
+<div class="mode-section">
+  <div class="mode-title">選択モード</div>
+  <div class="mode-grid">
+    <button class="mode-btn on" id="mode-0" onclick="setMode(0)">部分一致</button>
+    <button class="mode-btn"    id="mode-1" onclick="setMode(1)">前方一致</button>
+    <button class="mode-btn"    id="mode-2" onclick="setMode(2)">完全一致</button>
+  </div>
+</div>
+
+<!-- 条件（旧：オプション） -->
+<div class="section">
+  <div class="section-title">条件</div>
+
+  <label class="check-row">
+    <input type="checkbox" id="chk-target" checked>
+    <label for="chk-target">トラックターゲットに従う</label>
+  </label>
+
+  <label class="check-row">
+    <input type="checkbox" id="chk-exclude" checked>
+    <label for="chk-exclude">元のクリップを含めない</label>
+  </label>
+
+  <div class="margin-row">
+    <span class="margin-label">猶予</span>
+    <input class="margin-input" id="margin" type="number" value="0" step="1">
+    <span class="margin-label">フレーム</span>
+  </div>
+  <div class="hint">＋ で広げる　／　− で縮める</div>
+
+  <button class="btn exec" onclick="run('rangeSelector')">実行</button>
+</div>
+
+<!-- オプション（旧：選択） -->
+<div class="section">
+  <div class="section-title">オプション</div>
+  <div class="grid">
+    <button class="btn" onclick="run('selectSameName')">同名全選択</button>
+    <button class="btn" onclick="run('selectDisabled')">無効選択</button>
+    <button class="btn" onclick="run('selectEnabled')">有効選択</button>
+  </div>
+</div>
+
+<script>
+var selectionMode = 0;
+
+function setMode(m) {
+  selectionMode = m;
+  for (var i = 0; i < 3; i++) {
+    document.getElementById('mode-' + i).classList.toggle('on', i === m);
+  }
+}
+
+function run(funcName) {
+  var followTargets   = document.getElementById('chk-target').checked;
+  var excludeOriginal = document.getElementById('chk-exclude').checked;
+  var marginFrames    = parseInt(document.getElementById('margin').value) || 0;
+  window.__adobe_cep__.evalScript(
+    funcName + '(' + followTargets + ', ' + excludeOriginal + ', ' + marginFrames + ', ' + selectionMode + ')',
+    function() {}
+  );
+}
+</script>
+</body>
+</html>

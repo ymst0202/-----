@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #222;
+  color: #ccc;
+  font-family: "Meiryo", "Yu Gothic", sans-serif;
+  font-size: 11px;
+  padding: 8px;
+  user-select: none;
+}
+
+.section {
+  background: #2a2a2a;
+  border-radius: 3px;
+  padding: 7px;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 9px;
+  color: #666;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #333;
+}
+
+/* トラック行 */
+.track-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.type-btn {
+  background: #3c3c3c;
+  color: #aaa;
+  border: 1px solid #505050;
+  border-radius: 2px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.type-btn:hover { background: #484848; }
+.type-btn.on {
+  background: #1e3a5f;
+  color: #7ab8f5;
+  border-color: #3a6ea8;
+}
+.track-num {
+  background: #333;
+  color: #ccc;
+  border: 1px solid #505050;
+  border-radius: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  width: 52px;
+  text-align: center;
+  font-family: inherit;
+}
+.track-num:focus { outline: none; border-color: #3a6ea8; }
+.label { color: #888; font-size: 10px; white-space: nowrap; }
+.auto-btn {
+  background: #3c3c3c;
+  color: #888;
+  border: 1px solid #505050;
+  border-radius: 2px;
+  padding: 4px 7px;
+  font-size: 9px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.auto-btn:hover { background: #484848; color: #bbb; }
+
+/* クリップ選択セクション */
+.clip-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.bin-label {
+  color: #7ab8f5;
+  font-size: 10px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.load-btn {
+  background: #2d3e2d;
+  color: #7abf7a;
+  border: 1px solid #4a7a4a;
+  border-radius: 2px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.load-btn:hover { background: #3a5a3a; }
+
+/* すべて選択行 */
+.all-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 5px;
+  background: #333;
+  border-radius: 2px 2px 0 0;
+  border-bottom: 1px solid #444;
+}
+.all-row input[type="checkbox"] {
+  width: 13px; height: 13px;
+  accent-color: #3a6ea8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.all-row label {
+  cursor: pointer;
+  color: #aaa;
+  font-size: 10px;
+}
+.all-count {
+  margin-left: auto;
+  color: #666;
+  font-size: 9px;
+}
+
+/* クリップ一覧 */
+.clip-list {
+  max-height: 120px;
+  overflow-y: auto;
+  background: #1e1e1e;
+  border-radius: 0 0 2px 2px;
+  border: 1px solid #3a3a3a;
+  border-top: none;
+}
+.clip-list::-webkit-scrollbar { width: 6px; }
+.clip-list::-webkit-scrollbar-track { background: #1e1e1e; }
+.clip-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.clip-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.clip-item:last-child { border-bottom: none; }
+.clip-item:hover { background: #252525; }
+.clip-item input[type="checkbox"] {
+  width: 13px; height: 13px;
+  accent-color: #3a6ea8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.clip-item label {
+  cursor: pointer;
+  color: #bbb;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.empty-msg {
+  color: #555;
+  font-size: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+/* オプション */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.check-row input[type="checkbox"] {
+  width: 13px; height: 13px;
+  accent-color: #3a6ea8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.check-row label { cursor: pointer; color: #bbb; font-size: 10px; }
+.hint { color: #555; font-size: 9px; margin-top: 4px; }
+
+/* 実行ボタン */
+.exec-btn {
+  width: 100%;
+  background: #1e3a5f;
+  color: #7ab8f5;
+  border: 1px solid #3a6ea8;
+  border-radius: 2px;
+  padding: 8px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 7px;
+}
+.exec-btn:hover { background: #274d7a; }
+.exec-btn:active { background: #1a3050; }
+
+/* ステータス */
+.status {
+  color: #555;
+  font-size: 10px;
+  min-height: 16px;
+  text-align: center;
+  padding: 2px 4px;
+  word-break: break-all;
+}
+.status.ok      { color: #5fa85f; }
+.status.err     { color: #c06060; }
+.status.working { color: #888; }
+</style>
+</head>
+<body>
+
+<!-- 基準トラック -->
+<div class="section">
+  <div class="section-title">基準トラック（タイミング参照）</div>
+  <div class="track-row">
+    <button class="type-btn on" id="ref-V" onclick="setRefType(0)">V</button>
+    <button class="type-btn"    id="ref-A" onclick="setRefType(1)">A</button>
+    <span class="label" style="margin-left:2px">トラック</span>
+    <input class="track-num" id="ref-num" type="number" value="1" min="1" max="99">
+    <button class="auto-btn" onclick="autoDetect()">ターゲット取得</button>
+  </div>
+  <div class="hint" style="margin-top:4px">タイムラインでクリップを選択中 → 選択位置のみ使用</div>
+</div>
+
+<!-- 配置先トラック -->
+<div class="section">
+  <div class="section-title">配置先トラック</div>
+  <div class="track-row">
+    <button class="type-btn"    id="dest-V" onclick="setDestType(0)">V</button>
+    <button class="type-btn on" id="dest-A" onclick="setDestType(1)">A</button>
+    <span class="label" style="margin-left:2px">トラック</span>
+    <input class="track-num" id="dest-num" type="number" value="1" min="1" max="99">
+  </div>
+</div>
+
+<!-- クリップ選択 -->
+<div class="section">
+  <div class="section-title">クリップ選択</div>
+  <div class="clip-header">
+    <span class="bin-label" id="bin-label">ビンを開いて読み込んでください</span>
+    <button class="load-btn" onclick="loadBin()">読み込み</button>
+  </div>
+  <div class="all-row" id="all-row" style="display:none">
+    <input type="checkbox" id="chk-all" onchange="toggleAll(this.checked)" checked>
+    <label for="chk-all">すべて選択</label>
+    <span class="all-count" id="all-count"></span>
+  </div>
+  <div class="clip-list" id="clip-list">
+    <div class="empty-msg">読み込みボタンで取得</div>
+  </div>
+</div>
+
+<!-- オプション -->
+<div class="section">
+  <div class="section-title">オプション</div>
+  <label class="check-row">
+    <input type="checkbox" id="chk-duration">
+    <label for="chk-duration">基準クリップに長さを合わせる</label>
+  </label>
+</div>
+
+<button class="exec-btn" onclick="run()">配置実行</button>
+<div class="status" id="status">—</div>
+
+<script>
+var refType    = 0; // 0=V, 1=A
+var destType   = 1;
+var loadedItems = []; // [{name, nodeId}]
+
+function setRefType(t) {
+  refType = t;
+  document.getElementById('ref-V').classList.toggle('on', t === 0);
+  document.getElementById('ref-A').classList.toggle('on', t === 1);
+}
+function setDestType(t) {
+  destType = t;
+  document.getElementById('dest-V').classList.toggle('on', t === 0);
+  document.getElementById('dest-A').classList.toggle('on', t === 1);
+}
+
+function setStatus(msg) {
+  var el = document.getElementById('status');
+  if (!msg) { el.className = 'status'; el.textContent = '—'; return; }
+  if (msg.indexOf('ERROR') === 0) {
+    el.className = 'status err';
+    el.textContent = msg.replace(/^ERROR:/, '');
+  } else if (msg.indexOf('OK') === 0) {
+    el.className = 'status ok';
+    el.textContent = msg.replace(/^OK:/, '');
+  } else {
+    el.className = 'status working';
+    el.textContent = msg;
+  }
+}
+
+// ターゲットトラック自動取得
+function autoDetect() {
+  setStatus('取得中...');
+  window.__adobe_cep__.evalScript('getTargetedTracks()', function(result) {
+    if (!result || result.indexOf('ERROR') === 0) {
+      setStatus(result || 'ERROR:取得失敗'); return;
+    }
+    var parts = result.replace('OK:', '').split(':');
+    var v = parseInt(parts[0]);
+    var a = parseInt(parts[1]);
+    if (v > 0) { setRefType(0); document.getElementById('ref-num').value = v; }
+    if (a > 0) { setDestType(1); document.getElementById('dest-num').value = a; }
+    setStatus('OK:V' + (v > 0 ? v : '–') + ' / A' + (a > 0 ? a : '–') + ' 取得');
+  });
+}
+
+// ビン内容読み込み
+function loadBin() {
+  setStatus('読み込み中...');
+  window.__adobe_cep__.evalScript('getBinItems()', function(result) {
+    if (!result || result.indexOf('ERROR') === 0) {
+      setStatus(result || 'ERROR:読み込み失敗'); return;
+    }
+    // "OK:binName\tname1\tnodeId1\tname2\tnodeId2..."
+    var parts = result.replace('OK:', '').split('\t');
+    var binName = parts[0];
+    loadedItems = [];
+    for (var i = 1; i + 1 < parts.length; i += 2) {
+      loadedItems.push({ name: parts[i], nodeId: parts[i + 1] });
+    }
+    renderList(binName);
+    setStatus('OK:' + loadedItems.length + '件読み込み');
+  });
+}
+
+// チェックボックス一覧描画
+function renderList(binName) {
+  document.getElementById('bin-label').textContent = binName || '';
+  var list = document.getElementById('clip-list');
+  list.innerHTML = '';
+
+  if (loadedItems.length === 0) {
+    list.innerHTML = '<div class="empty-msg">クリップが見つかりません</div>';
+    document.getElementById('all-row').style.display = 'none';
+    return;
+  }
+
+  for (var i = 0; i < loadedItems.length; i++) {
+    var div = document.createElement('div');
+    div.className = 'clip-item';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.id = 'clip-' + i;
+    cb.checked = true;
+    cb.addEventListener('change', updateAllCheck);
+    var lbl = document.createElement('label');
+    lbl.htmlFor = 'clip-' + i;
+    lbl.textContent = loadedItems[i].name;
+    lbl.title = loadedItems[i].name;
+    div.appendChild(cb);
+    div.appendChild(lbl);
+    list.appendChild(div);
+  }
+
+  document.getElementById('all-row').style.display = 'flex';
+  document.getElementById('chk-all').checked = true;
+  updateCount();
+}
+
+// すべて選択トグル
+function toggleAll(checked) {
+  var cbs = document.querySelectorAll('#clip-list input[type="checkbox"]');
+  for (var i = 0; i < cbs.length; i++) cbs[i].checked = checked;
+  updateCount();
+}
+
+// 個別チェック変更時にすべて選択の状態を更新
+function updateAllCheck() {
+  var cbs = document.querySelectorAll('#clip-list input[type="checkbox"]');
+  var checkedCount = 0;
+  for (var i = 0; i < cbs.length; i++) if (cbs[i].checked) checkedCount++;
+  var allCb = document.getElementById('chk-all');
+  allCb.indeterminate = (checkedCount > 0 && checkedCount < cbs.length);
+  allCb.checked = (checkedCount === cbs.length);
+  updateCount();
+}
+
+function updateCount() {
+  var cbs = document.querySelectorAll('#clip-list input[type="checkbox"]');
+  var checked = 0;
+  for (var i = 0; i < cbs.length; i++) if (cbs[i].checked) checked++;
+  document.getElementById('all-count').textContent = checked + ' / ' + cbs.length + '件';
+}
+
+// 配置実行
+function run() {
+  var selected = [];
+  for (var i = 0; i < loadedItems.length; i++) {
+    var cb = document.getElementById('clip-' + i);
+    if (cb && cb.checked) selected.push(loadedItems[i].nodeId);
+  }
+  if (selected.length === 0) { setStatus('ERROR:クリップを1つ以上チェックしてください'); return; }
+
+  var refNum  = parseInt(document.getElementById('ref-num').value)  || 1;
+  var destNum = parseInt(document.getElementById('dest-num').value) || 1;
+  var matchDur = document.getElementById('chk-duration').checked;
+
+  setStatus('処理中...');
+  var script = 'placeClipsByNodeIds("' + selected.join(',') + '",' +
+    refType + ',' + refNum + ',' + destType + ',' + destNum + ',' + matchDur + ')';
+  window.__adobe_cep__.evalScript(script, function(result) {
+    setStatus(result || 'ERROR:応答なし');
+  });
+}
+</script>
+</body>
+</html>

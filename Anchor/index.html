@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アンカー</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Header -->
+    <div class="header">
+      <span class="header-title">アンカーポイント</span>
+      <button id="btn-refresh" class="icon-btn" title="クリップ情報を更新">&#8635;</button>
+    </div>
+
+    <!-- 3x3 Snap Grid -->
+    <div class="grid-section">
+      <div class="snap-grid">
+        <button class="snap-btn pos-7" data-pos="7" title="左上">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-8" data-pos="8" title="上中央">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-9" data-pos="9" title="右上">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+
+        <button class="snap-btn pos-4" data-pos="4" title="左中央">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-5" data-pos="5" title="中央">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-6" data-pos="6" title="右中央">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+
+        <button class="snap-btn pos-1" data-pos="1" title="左下">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-2" data-pos="2" title="下中央">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+        <button class="snap-btn pos-3" data-pos="3" title="右下">
+          <div class="btn-frame"><span class="btn-dot"></span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-section">
+      <label class="check-label" title="位置を固定してアンカーポイントのみ移動">
+        <input type="checkbox" id="chk-hold" checked>
+        <span class="check-custom"></span>
+        Hold Position
+      </label>
+    </div>
+
+    <!-- Bounds detection -->
+    <div class="detect-section">
+      <div class="detect-title">BOUNDS</div>
+
+      <div id="row-crop" class="detect-row">
+        <span class="detect-icon">&#9632;</span>
+        <label class="detect-chk-label" title="クロップエフェクトの範囲を基準にする">
+          <input type="checkbox" id="chk-crop" disabled>
+          <span class="chk-sm"></span>
+        </label>
+        <span class="detect-label">Crop</span>
+        <span id="val-crop" class="detect-val">—</span>
+      </div>
+
+      <div id="row-alpha" class="detect-row">
+        <span class="detect-icon">&#9670;</span>
+        <label class="detect-chk-label" title="アルファチャンネルの不透明領域を基準にする">
+          <input type="checkbox" id="chk-alpha" disabled>
+          <span class="chk-sm"></span>
+        </label>
+        <span class="detect-label">Alpha</span>
+        <span id="val-alpha" class="detect-val">—</span>
+      </div>
+
+      <div id="row-mask" class="detect-row">
+        <span class="detect-icon">&#9632;</span>
+        <label class="detect-chk-label" title="マスクの範囲を基準にする">
+          <input type="checkbox" id="chk-mask" disabled>
+          <span class="chk-sm"></span>
+        </label>
+        <span class="detect-label">Mask</span>
+        <span id="val-mask" class="detect-val">—</span>
+      </div>
+
+      <!-- Transform effects (動的生成、検出時のみ表示) -->
+      <div id="transform-section" style="display:none;">
+        <div class="detect-title tfx-title">TRANSFORM</div>
+        <div id="transform-rows"></div>
+      </div>
+
+      <!-- Mask manual input (hidden by default) -->
+      <div id="mask-manual" style="display:none;">
+        <div class="manual-title">マスク範囲を手動入力 (%)</div>
+        <div class="manual-grid">
+          <span class="manual-label">左</span><input id="mask-l" class="manual-inp" type="number" value="0" min="0" max="99">
+          <span class="manual-label">右</span><input id="mask-r" class="manual-inp" type="number" value="0" min="0" max="99">
+          <span class="manual-label">上</span><input id="mask-t" class="manual-inp" type="number" value="0" min="0" max="99">
+          <span class="manual-label">下</span><input id="mask-b" class="manual-inp" type="number" value="0" min="0" max="99">
+        </div>
+        <button id="mask-apply" class="manual-apply">適用</button>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span id="status-dot" class="status-dot ready"></span>
+      <span id="status-text">クリップを選択してください</span>
+    </div>
+
+  </div>
+
+  <canvas id="alpha-canvas" style="display:none;"></canvas>
+  <img id="alpha-img" style="display:none;" crossorigin="anonymous">
+
+  <script src="js/CSInterface.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
